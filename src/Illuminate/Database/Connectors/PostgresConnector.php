@@ -89,9 +89,11 @@ class PostgresConnector extends Connector implements ConnectorInterface
      */
     protected function configureSearchPath($connection, $config)
     {
-        $searchPath = $this->formatSearchPath($config['searchpath'] ?? $config['schema'] ?? 'public');
+        if(isset($config['searchpath']) || isset($config['schema'])) {
+            $searchPath = $this->formatSearchPath($config['searchpath'] ?? $config['schema'] ?? 'public');
 
-        $connection->prepare('set search_path to ' . implode(',', $searchPath))->execute();
+            $connection->prepare("set search_path to {$searchPath}")->execute();
+        }
     }
 
     /**
@@ -103,17 +105,9 @@ class PostgresConnector extends Connector implements ConnectorInterface
     protected function formatSearchPath($searchPath)
     {
         if (is_array($searchPath)) {
-            $schemas = array_map(function($item) {
-                return $item;
-            }, $searchPath);
-
-            $preparedSchemas = array_map(function($item) {
-                return ":$item";
-            }, $schemas);
-
-            return array_combine($preparedSchemas, $schemas);
+            return '"'.implode('", "', $searchPath).'"';
         } else {
-            return [":$searchPath" => $searchPath];
+            return '"'.$searchPath.'"';
         }
     }
 
