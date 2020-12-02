@@ -109,10 +109,11 @@ class PostgresConnector extends Connector implements ConnectorInterface
     protected function formatSearchPath($searchPath)
     {
         if (is_array($searchPath)) {
-            return '"'.implode('", "', $searchPath).'"';
+            $searchPath = '"'.implode('", "', $searchPath).'"';
         }
 
         preg_match_all('/[a-zA-z0-9$]{1,}/i', $searchPath, $matches);
+
         return '"'.implode('", "', $matches[0]).'"';
     }
 
