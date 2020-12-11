@@ -17,7 +17,9 @@ class PostgresBuilder extends Builder
         $table = $this->connection->getTablePrefix().$table;
 
         return count($this->connection->select(
-            $this->grammar->compileTableExists(), [$database, $schema, $table]
+            $this->grammar->compileTableExists(
+                [$schema] + $this->parseSearchPath($this->connection->getConfig('search_path'))
+            ), [$database, $table]
         )) > 0;
     }
 
@@ -152,7 +154,9 @@ class PostgresBuilder extends Builder
         $table = $this->connection->getTablePrefix().$table;
 
         $results = $this->connection->select(
-            $this->grammar->compileColumnListing(), [$database, $schema, $table]
+            $this->grammar->compileColumnListing(
+                [$schema] + $this->parseSearchPath($this->connection->getConfig('search_path'))
+            ), [$database, $table]
         );
 
         return $this->connection->getPostProcessor()->processColumnListing($results);
@@ -211,14 +215,16 @@ class PostgresBuilder extends Builder
             $searchPath = $matches[0];
         }
 
-        array_walk($searchPath, function (&$schema) {
-            $schema = trim($schema, '\'"');
+        if (is_array($searchPath)) {
+            array_walk($searchPath, function (&$schema) {
+                $schema = trim($schema, '\'"');
 
-            $schema = $schema === '$user'
-                ? $this->connection->getConfig('username')
-                : $schema;
-        });
+                $schema = $schema === '$user'
+                    ? $this->connection->getConfig('username')
+                    : $schema;
+            });
+        }
 
-        return $searchPath;
+        return !empty($searchPath) ? $searchPath : [];
     }
 }

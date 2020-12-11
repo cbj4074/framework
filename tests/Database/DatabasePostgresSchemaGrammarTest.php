@@ -1020,16 +1020,16 @@ class DatabasePostgresSchemaGrammarTest extends TestCase
 
     public function testCompileTableExists()
     {
-        $statement = $this->getGrammar()->compileTableExists();
+        $statement = $this->getGrammar()->compileTableExists(['foouser', 'public']);
 
-        $this->assertSame('select * from information_schema.tables where table_catalog = ? and table_schema = ? and table_name = ? and table_type = \'BASE TABLE\'', $statement);
+        $this->assertSame("select * from information_schema.tables where table_catalog = ? and table_schema in ('foouser','public') and table_name = ? and table_type = 'BASE TABLE'", $statement);
     }
 
     public function testCompileColumnListing()
     {
-        $statement = $this->getGrammar()->compileColumnListing();
+        $statement = $this->getGrammar()->compileColumnListing(['foouser', 'public']);
 
-        $this->assertSame('select column_name from information_schema.columns where table_catalog = ? and table_schema = ? and table_name = ?', $statement);
+        $this->assertSame("select column_name from information_schema.columns where table_catalog = ? and table_schema in ('foouser','public') and table_name = ?", $statement);
     }
 
     protected function getConnection()

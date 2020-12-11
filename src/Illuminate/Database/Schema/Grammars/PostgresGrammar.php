@@ -38,21 +38,23 @@ class PostgresGrammar extends Grammar
     /**
      * Compile the query to determine if a table exists.
      *
+     * @param  string|array  $searchPath
      * @return string
      */
-    public function compileTableExists()
+    public function compileTableExists($searchPath)
     {
-        return "select * from information_schema.tables where table_catalog = ? and table_schema = ? and table_name = ? and table_type = 'BASE TABLE'";
+        return "select * from information_schema.tables where table_catalog = ? and table_schema in ('".implode("','", (array) $searchPath)."') and table_name = ? and table_type = 'BASE TABLE'";
     }
 
     /**
      * Compile the query to determine the list of columns.
      *
+     * @param  string|array  $searchPath
      * @return string
      */
-    public function compileColumnListing()
+    public function compileColumnListing($searchPath)
     {
-        return 'select column_name from information_schema.columns where table_catalog = ? and table_schema = ? and table_name = ?';
+        return "select column_name from information_schema.columns where table_catalog = ? and table_schema in ('".implode("','", (array) $searchPath)."') and table_name = ?";
     }
 
     /**
@@ -246,12 +248,12 @@ class PostgresGrammar extends Grammar
     /**
      * Compile the SQL needed to retrieve all table names.
      *
-     * @param  string|array  $schema
+     * @param  string|array  $searchPath
      * @return string
      */
-    public function compileGetAllTables($schema)
+    public function compileGetAllTables($searchPath)
     {
-        return "select tablename from pg_catalog.pg_tables where schemaname in ('".implode("','", (array) $schema)."')";
+        return "select tablename from pg_catalog.pg_tables where schemaname in ('".implode("','", (array) $searchPath)."')";
     }
 
     /**
@@ -260,9 +262,9 @@ class PostgresGrammar extends Grammar
      * @param  string|array  $schema
      * @return string
      */
-    public function compileGetAllViews($schema)
+    public function compileGetAllViews($searchPath)
     {
-        return "select viewname from pg_catalog.pg_views where schemaname in ('".implode("','", (array) $schema)."')";
+        return "select viewname from pg_catalog.pg_views where schemaname in ('".implode("','", (array) $searchPath)."')";
     }
 
     /**
