@@ -546,11 +546,9 @@ class SupportStringableTest extends TestCase
         $this->assertSame(['foo', 'bar', 'baz'], $chunks->all());
     }
 
-    public function testJsonSerializable()
+    public function testJsonSerialize()
     {
-        $this->assertSame('"laravel-php-framework"', json_encode($this->stringable('LaravelPhpFramework')->kebab()));
-        $this->assertSame('["laravel-php-framework"]', json_encode([$this->stringable('LaravelPhpFramework')->kebab()]));
-        $this->assertSame('{"title":"laravel-php-framework"}', json_encode(['title' => $this->stringable('LaravelPhpFramework')->kebab()]));
+        $this->assertSame('"foo"', json_encode($this->stringable('foo')));
     }
 
     public function testTap()
