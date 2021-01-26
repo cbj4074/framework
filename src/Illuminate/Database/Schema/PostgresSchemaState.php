@@ -16,16 +16,12 @@ class PostgresSchemaState extends SchemaState
      */
     public function dump(Connection $connection, $path)
     {
-        $searchPath = $connection->getConfig('search_path') ?: 'public';
-
-        $searchPath = $searchPath === 'public' ? '' : $searchPath.'.';
-
         $excludedTables = collect($connection->getSchemaBuilder()->getAllTables())
                         ->map->tablename
                         ->reject(function ($table) {
                             return $table === $this->migrationTable;
-                        })->map(function ($table) use ($searchPath) {
-                            return '--exclude-table-data='.$searchPath.$table;
+                        })->map(function ($table) {
+                            return "--exclude-table-data=*.$table";
                         })->implode(' ');
 
         $this->makeProcess(
